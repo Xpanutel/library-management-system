@@ -5,12 +5,26 @@ import (
 	"net/http"
 	"sync"
 	"github.com/gorilla/sessions"
-	"log"
 )
 
+type User struct {
+	ID       int
+	Username string
+	Password string
+	IsAdmin  bool
+}
+
+type Book struct {
+	ID     int
+	Title  string
+	Author string
+	Genre  string
+	IsLoaned bool
+}
+
 var (
-	bookStore   = make(map[int]*models.Book)
-	userStore   = make(map[int]*models.User)
+	bookStore   = make(map[int]*Book)
+	userStore   = make(map[int]*User)
 	sessionStore = sessions.NewCookieStore([]byte("secret-key"))
 	bookID      = 1
 	userID      = 1
@@ -23,7 +37,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		password := r.FormValue("password")
 
 		mu.Lock()
-		userStore[userID] = &models.User{ID: userID, Username: username, Password: password}
+		userStore[userID] = &User{ID: userID, Username: username, Password: password}
 		userID++
 		mu.Unlock()
 
@@ -56,12 +70,12 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := sessionStore.Get(r, "session")
-	userID, ok := session.Values["userID"].(int)
-	if !ok {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
+	// session, _ := sessionStore.Get(r, "session")
+	// userID, ok := session.Values["userID"].(int)
+	// if !ok {
+	// 	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	// 	return
+	// }
 
 	// Здесь логика для отображения информации о пользователе и его книгах
 	tmpl, _ := template.ParseFiles("templates/dashboard.html")
@@ -81,7 +95,7 @@ func booksHandler(w http.ResponseWriter, r *http.Request) {
 		genre := r.FormValue("genre")
 
 		mu.Lock()
-		bookStore[bookID] = &models.Book{ID: bookID, Title: title, Author: author, Genre: genre, IsLoaned: false}
+		bookStore[bookID] = &Book{ID: bookID, Title: title, Author: author, Genre: genre, IsLoaned: false}
 		bookID++
 		mu.Unlock()
 
