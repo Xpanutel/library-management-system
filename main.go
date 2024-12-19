@@ -55,6 +55,26 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
+func dashboardHandler(w http.ResponseWriter, r *http.Request) {
+	session, _ := sessionStore.Get(r, "session")
+	userID, ok := session.Values["userID"].(int)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// Здесь логика для отображения информации о пользователе и его книгах
+	tmpl, _ := template.ParseFiles("templates/dashboard.html")
+	tmpl.Execute(w, nil)
+}
+
+func adminHandler(w http.ResponseWriter, r *http.Request) {
+	// Здесь будет логика для администраторов
+	tmpl, _ := template.ParseFiles("templates/admin.html")
+	tmpl.Execute(w, nil)
+}
+
+
 func main() {
 	http.HandleFunc("/register", registerHandler)
 	http.HandleFunc("/login", loginHandler)
