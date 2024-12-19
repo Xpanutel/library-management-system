@@ -74,6 +74,24 @@ func adminHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
+func booksHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		title := r.FormValue("title")
+		author := r.FormValue("author")
+		genre := r.FormValue("genre")
+
+		mu.Lock()
+		bookStore[bookID] = &models.Book{ID: bookID, Title: title, Author: author, Genre: genre, IsLoaned: false}
+		bookID++
+		mu.Unlock()
+
+		http.Redirect(w, r, "/books", http.StatusSeeOther)
+		return
+	}
+
+	tmpl, _ := template.ParseFiles("templates/books.html")
+	tmpl.Execute(w, nil)
+}
 
 func main() {
 	http.HandleFunc("/register", registerHandler)
